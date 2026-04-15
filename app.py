@@ -294,10 +294,17 @@ with col_map:
 
     # Footer
     country_str = st.session_state.get("user_country", "")
-    st.caption(
-        f"**{st.session_state.user_city}"
-        + (f", {country_str}" if country_str else "")
-        + f"** · {lat:.4f}, {lon:.4f}"
+    city_str    = st.session_state.user_city
+    st.markdown(
+        f'<div style="font-size:0.82em;color:#aaa;margin-top:4px">'
+        f'📍 <b style="color:#ddd">{city_str}'
+        + (f', {country_str}' if country_str else '')
+        + f'</b> · {lat:.4f}, {lon:.4f}'
+        f'<br><span style="font-size:0.9em">Weather and regional signals refresh '
+        f'automatically after location change. '
+        f'Health signal is EU-wide and does not change with location.</span>'
+        f'</div>',
+        unsafe_allow_html=True,
     )
 
 # ── Risk indexes ─────────────────────────────────────────────────────────────
