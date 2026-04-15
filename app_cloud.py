@@ -489,6 +489,7 @@ with col_map:
 
         city = f"{clicked_lat:.2f}, {clicked_lon:.2f}"
         clicked_country = ""
+        geocode_error   = ""
         try:
             geo      = requests.get(
                 "https://nominatim.openstreetmap.org/reverse",
@@ -500,10 +501,14 @@ with col_map:
             geo_addr        = geo.get("address", {})
             city            = (geo_addr.get("city") or geo_addr.get("town")
                                or geo_addr.get("village")
+                               or geo_addr.get("municipality")
                                or geo.get("display_name", "").split(",")[0])
             clicked_country = geo_addr.get("country", "")
-        except Exception:
-            pass
+        except Exception as e:
+            geocode_error = str(e)
+
+        if geocode_error:
+            st.caption(f"⚠ Geocoding unavailable ({geocode_error}) — you can still set the location by coordinates.")
 
         if clicked_country and not is_supported(clicked_country):
             st.warning(
