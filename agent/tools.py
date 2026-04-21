@@ -1,14 +1,14 @@
 """
 agent/tools.py
 ---------------
-The four PrepSense agent tools.
+The four HAVEN agent tools.
 
 Each tool is a pure function that takes structured inputs and returns
 a structured result. The agent orchestrates them — tools themselves
 have no LLM dependency.
 
 Tools:
-    get_risk_score       → current PrepSenseSignals snapshot
+    get_risk_score       → current HavenSignals snapshot
     get_kit_gaps         → InventoryReport from current kit
     retrieve_guidelines  → top-k RAG chunks for a query
     run_scenario         → survival estimate for a given event + duration
@@ -132,10 +132,10 @@ class GuidelineResult:
 
 def get_risk_score(signals) -> RiskSummary:
     """
-    Extract and format the current PrepSenseSignals into a RiskSummary.
+    Extract and format the current HavenSignals into a RiskSummary.
 
     Args:
-        signals: PrepSenseSignals dataclass from the risk engine.
+        signals: HavenSignals dataclass from the risk engine.
 
     Returns:
         RiskSummary with all three dimensions and an overall concern level.
@@ -240,7 +240,7 @@ def retrieve_guidelines(retriever, query: str, k: int = 4) -> GuidelineResult:
     Retrieve relevant chunks from the RAG knowledge base.
 
     Args:
-        retriever: PrepSenseRetriever instance.
+        retriever: HavenRetriever instance.
         query:     Natural language query to search for.
         k:         Number of chunks to retrieve.
 
@@ -312,16 +312,15 @@ def run_scenario(
     water_rate_per_day = _WATER_RATES[event_type]
     water_rate_per_hour = water_rate_per_day / 24
 
-    # Build a lookup of current kit quantities by category and name
+    # Build a lookup of current kit quantities by category and name.
+    # Use all_items (full inventory) so fully-stocked items are included.
+    # Fall back to gaps list for InventoryReport objects built without all_items.
     kit_lookup: Dict[str, float] = {}
-    for item in inv_report.gaps:
-        # gaps only contains items below recommendation
-        kit_lookup[item.name.lower()] = item.current
-        kit_lookup[item.category.lower()] = kit_lookup.get(item.category.lower(), 0) + item.current
-
-    # Also need items that are fully stocked (not in gaps)
-    # We reconstruct from the full report via gap_pct logic
-    # Items with gap_pct=0 aren't in the gaps list — treat them as fully stocked
+    source_items = inv_report.all_items if inv_report.all_items else inv_report.gaps
+    for item in source_items:
+        current = getattr(item, "quantity", None) or getattr(item, "current", 0)
+        kit_lookup[item.name.lower()] = current
+        kit_lookup[item.category.lower()] = kit_lookup.get(item.category.lower(), 0) + current
 
     # Water survival
     water_available = kit_lookup.get("drinking water", kit_lookup.get("water", 0))

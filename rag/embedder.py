@@ -158,7 +158,7 @@ def build_and_save(
     from rag.chunker import extract_chunks
 
     print("=" * 50)
-    print("PrepSense RAG — Building Knowledge Base")
+    print("HAVEN RAG — Building Knowledge Base")
     print("=" * 50)
 
     # Step 1: extract and chunk

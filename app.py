@@ -1,7 +1,7 @@
 """
 app.py
 -------
-PrepSense Streamlit dashboard — single-page layout.
+HAVEN Streamlit dashboard — single-page layout.
 
 Structure:
     Header          — title + refresh button (full width)
@@ -128,7 +128,7 @@ def alert_card_html(alert: dict) -> str:
 # ---------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="PrepSense",
+    page_title="HAVEN",
     page_icon="🛡",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -167,7 +167,7 @@ api_ok = "error" not in risk_data
 
 col_title, col_meta, col_refresh = st.columns([3, 2, 1])
 with col_title:
-    st.markdown("# 🛡 PrepSense")
+    st.markdown("# 🛡 HAVEN")
     st.markdown("*AI-powered emergency preparedness copilot*")
 with col_meta:
     if api_ok:
@@ -246,7 +246,7 @@ with col_map:
                 "https://nominatim.openstreetmap.org/reverse",
                 params={"lat": clicked_lat, "lon": clicked_lon,
                         "format": "json", "zoom": 10},
-                headers={"User-Agent": "PrepSense/1.0",
+                headers={"User-Agent": "HAVEN/1.0",
                          "Accept-Language": "en"},
                 timeout=5,
             ).json()

@@ -3,7 +3,7 @@ api/state.py
 -------------
 Singleton application state shared across FastAPI endpoints and the scheduler.
 
-Kit persistence: SQLite (prepsense.db).
+Kit persistence: SQLite (haven.db).
     - On startup: load kit + household_size from DB, fall back to defaults
     - On every kit/household update: write to DB immediately
     - On Render free tier: DB survives restarts but NOT redeploys (ephemeral FS)
@@ -17,12 +17,12 @@ import logging
 from datetime import datetime, timezone, date
 from typing import Optional
 
-from core.risk_engine import RiskResult, PrepSenseSignals
+from core.risk_engine import RiskResult, HavenSignals
 from core.inventory_analyzer import KitItem, analyze_inventory, InventoryReport
 
-log = logging.getLogger("prepsense.state")
+log = logging.getLogger("haven.state")
 
-DB_PATH = os.getenv("DB_PATH", "prepsense.db")
+DB_PATH = os.getenv("DB_PATH", "haven.db")
 
 
 # ---------------------------------------------------------------------------
@@ -168,10 +168,10 @@ DEFAULT_KIT = [
 # ---------------------------------------------------------------------------
 
 class AppState:
-    """Singleton holding all shared PrepSense runtime state."""
+    """Singleton holding all shared HAVEN runtime state."""
 
     def __init__(self):
-        self.signals:        Optional[PrepSenseSignals] = None
+        self.signals:        Optional[HavenSignals] = None
         self.signals_ts:     Optional[datetime]         = None
         self.agent          = None
         self.retriever      = None
@@ -202,7 +202,7 @@ class AppState:
             weather_severity=0, alert_severity=25,
             wind_bonus=0, rain_bonus=0,
         )
-        self.signals = PrepSenseSignals(
+        self.signals = HavenSignals(
             weather=            risk,
             geo_score=          4,
             geo_trend=          "STABLE",
@@ -246,7 +246,7 @@ class AppState:
         self._refresh_inventory()
         log.info(f"Kit updated: {name} = {quantity}")
 
-    def update_signals(self, signals: PrepSenseSignals):
+    def update_signals(self, signals: HavenSignals):
         self.signals    = signals
         self.signals_ts = datetime.now(timezone.utc)
 

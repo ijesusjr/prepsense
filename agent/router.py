@@ -1,7 +1,7 @@
 """
 agent/router.py
 ----------------
-Intent classifier for PrepSense agent queries.
+Intent classifier for HAVEN agent queries.
 
 Design: structured routing over ReAct loop.
 
@@ -136,7 +136,7 @@ def _keyword_route(query: str) -> RoutingDecision:
 # LLM-based router (more accurate, used when backend available)
 # ---------------------------------------------------------------------------
 
-ROUTING_PROMPT = """You are a query router for PrepSense, an emergency preparedness assistant.
+ROUTING_PROMPT = """You are a query router for HAVEN, an emergency preparedness assistant.
 
 Classify the following user query into exactly one intent:
 

@@ -212,9 +212,9 @@ def compute_risk_score(weather: WeatherSnapshot, alerts: List[Alert]) -> RiskRes
 # ---------------------------------------------------------------------------
 
 @dataclass
-class PrepSenseSignals:
+class HavenSignals:
     """
-    Container for the three independent risk signals in PrepSense.
+    Container for the three independent risk signals in HAVEN.
 
     Option C design: signals are kept separate, displayed as three
     independent gauges in the UI. The alert prioritizer reads all three

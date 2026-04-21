@@ -1,7 +1,7 @@
 """
 api/main.py
 ------------
-PrepSense FastAPI backend.
+HAVEN FastAPI backend.
 
 Endpoints:
     GET  /                  health check
@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger("prepsense")
+log = logging.getLogger("haven")
 
 
 # ---------------------------------------------------------------------------
@@ -44,19 +44,19 @@ log = logging.getLogger("prepsense")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup: wire agent, run initial signal fetch, start scheduler."""
-    log.info("PrepSense API starting up...")
+    log.info("HAVEN API starting up...")
     _wire_agent()
     _run_all_fetchers()
     _start_scheduler()
-    log.info("PrepSense API ready.")
+    log.info("HAVEN API ready.")
     yield
-    log.info("PrepSense API shutting down.")
+    log.info("HAVEN API shutting down.")
     if _scheduler.running:
         _scheduler.shutdown(wait=False)
 
 
 app = FastAPI(
-    title="PrepSense API",
+    title="HAVEN API",
     description="AI-powered emergency preparedness copilot",
     version="1.0.0",
     lifespan=lifespan,
@@ -83,13 +83,13 @@ from core.regions import get_region, is_supported
 # ---------------------------------------------------------------------------
 
 def _wire_agent():
-    """Load RAG retriever, LLM, and PrepSenseAgent on startup."""
+    """Load RAG retriever, LLM, and HavenAgent on startup."""
     from pathlib import Path
     faiss_dir = Path("data/faiss")
 
     try:
-        from rag.retriever import PrepSenseRetriever
-        app_state.retriever = PrepSenseRetriever.from_disk(
+        from rag.retriever import HavenRetriever
+        app_state.retriever = HavenRetriever.from_disk(
             index_path=str(faiss_dir / "index.bin"),
             meta_path= str(faiss_dir / "chunks.json"),
         )
@@ -99,24 +99,24 @@ def _wire_agent():
         app_state.retriever = None
 
     try:
-        from rag.llm import PrepSenseLLM
+        from rag.llm import HavenLLM
         backend = os.getenv("LLM_BACKEND", "groq")
-        app_state.llm = PrepSenseLLM(backend=backend)
+        app_state.llm = HavenLLM(backend=backend)
         log.info(f"LLM backend: {backend} (available: {app_state.llm.is_available()})")
     except Exception as e:
         log.warning(f"LLM not available: {e}")
         app_state.llm = None
 
     if app_state.retriever is not None:
-        from agent.agent import PrepSenseAgent
-        app_state.agent = PrepSenseAgent(
+        from agent.agent import HavenAgent
+        app_state.agent = HavenAgent(
             retriever=  app_state.retriever,
             inv_report= app_state.inv_report,
             signals=    app_state.signals,
             llm=        app_state.llm,
             people=     int(os.getenv("HOUSEHOLD_SIZE", "1")),
         )
-        log.info("PrepSenseAgent wired.")
+        log.info("HavenAgent wired.")
 
 
 # ---------------------------------------------------------------------------
@@ -147,7 +147,7 @@ def _fetch_weather():
 
         from core.risk_engine import (
             WeatherSnapshot, Alert, compute_risk_score,
-            PrepSenseSignals, weather_id_to_severity,
+            HavenSignals, weather_id_to_severity,
         )
 
         weather_id = current.get("weather", [{}])[0].get("id", 800)
@@ -166,7 +166,7 @@ def _fetch_weather():
 
         # Keep geo + health from existing signals
         existing = app_state.signals
-        new_signals = PrepSenseSignals(
+        new_signals = HavenSignals(
             weather=            risk,
             geo_score=          existing.geo_score   if existing else 0,
             geo_trend=          existing.geo_trend   if existing else "STABLE",
@@ -198,8 +198,8 @@ def _fetch_regional():
         region  = get_region(country)
         geo = get_regional_snapshot(country=country, region_countries=region)
         existing = app_state.signals
-        from core.risk_engine import PrepSenseSignals
-        new_signals = PrepSenseSignals(
+        from core.risk_engine import HavenSignals
+        new_signals = HavenSignals(
             weather=            existing.weather        if existing else _stub_risk(),
             geo_score=          geo.regional_score,
             geo_trend=          "STABLE",
@@ -221,8 +221,8 @@ def _fetch_health():
         from core.health_fetcher import get_health_snapshot
         hs = get_health_snapshot()
         existing = app_state.signals
-        from core.risk_engine import PrepSenseSignals
-        new_signals = PrepSenseSignals(
+        from core.risk_engine import HavenSignals
+        new_signals = HavenSignals(
             weather=            existing.weather    if existing else _stub_risk(),
             geo_score=          existing.geo_score  if existing else 0,
             geo_trend=          existing.geo_trend  if existing else "STABLE",
@@ -301,7 +301,7 @@ class ScenarioRequest(BaseModel):
 def health_check():
     return {
         "status":      "ok",
-        "service":     "PrepSense API",
+        "service":     "HAVEN API",
         "version":     "1.0.0",
         "signals_age": f"{app_state.signals_age_minutes:.1f} min",
         "agent_ready": app_state.agent is not None,

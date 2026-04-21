@@ -12,7 +12,7 @@ Reference: Dutch government emergency kit guidelines (denkvooruit.nl, Nov 2025)
 
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 
 # ---------------------------------------------------------------------------
@@ -61,8 +61,9 @@ class ExpiryItem:
 
 @dataclass
 class InventoryReport:
-    gaps:     List[GapItem]
-    expiring: List[ExpiryItem]
+    gaps:      List[GapItem]
+    expiring:  List[ExpiryItem]
+    all_items: List["KitItem"] = field(default_factory=list)
 
     @property
     def has_critical_gaps(self) -> bool:
@@ -196,6 +197,7 @@ def analyze_inventory(
         InventoryReport with gaps and expiring lists.
     """
     return InventoryReport(
-        gaps=analyze_gaps(items),
-        expiring=analyze_expiry(items, reference_date),
+        gaps=      analyze_gaps(items),
+        expiring=  analyze_expiry(items, reference_date),
+        all_items= list(items),
     )

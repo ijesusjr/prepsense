@@ -36,12 +36,12 @@ class RetrievedChunk:
 # Retriever
 # ---------------------------------------------------------------------------
 
-class PrepSenseRetriever:
+class HavenRetriever:
     """
-    Semantic retriever for PrepSense RAG pipeline.
+    Semantic retriever for HAVEN RAG pipeline.
 
     Usage:
-        retriever = PrepSenseRetriever.from_disk(
+        retriever = HavenRetriever.from_disk(
             index_path="data/faiss/index.bin",
             meta_path="data/faiss/chunks.json",
         )
@@ -68,7 +68,7 @@ class PrepSenseRetriever:
         index_path: str,
         meta_path:  str,
         model_name: str = EMBEDDING_MODEL,
-    ) -> "PrepSenseRetriever":
+    ) -> "HavenRetriever":
         """Load retriever from persisted FAISS index and chunk metadata."""
         index, chunks = load_index(index_path, meta_path)
         return cls(index=index, chunks=chunks, model_name=model_name)

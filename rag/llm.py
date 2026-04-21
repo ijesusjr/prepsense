@@ -1,7 +1,7 @@
 """
 rag/llm.py
 -----------
-LLM wrapper for PrepSense RAG.
+LLM wrapper for HAVEN RAG.
 
 Three backends, one interface:
     LOCAL (development):  Ollama running Mistral 7B locally
@@ -32,7 +32,7 @@ from rag.retriever import RetrievedChunk
 # Prompt templates
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """You are PrepSense, an AI emergency preparedness advisor.
+SYSTEM_PROMPT = """You are HAVEN, an AI emergency preparedness advisor.
 Your role is to help users understand their emergency kit needs based on
 official EU government guidance.
 
@@ -113,7 +113,7 @@ def _call_ollama(
                 "model":  model,
                 "prompt": prompt,
                 "stream": False,
-                "options": {"temperature": temperature, "num_predict": 512},
+                "options": {"temperature": temperature, "num_predict": 1024},
             },
             timeout=120,
         )
@@ -136,7 +136,7 @@ def _call_groq(
     kit_gaps:    str,
     model:       str = "llama-3.1-8b-instant",
     temperature: float = 0.2,
-    max_tokens:  int = 512,
+    max_tokens:  int = 1024,
 ) -> str:
     """
     Call Groq API — free tier, OpenAI-compatible.
@@ -192,7 +192,7 @@ def _call_anthropic(
     kit_gaps:    str,
     model:       str = "claude-haiku-4-5-20251001",
     temperature: float = 0.2,
-    max_tokens:  int = 512,
+    max_tokens:  int = 1024,
 ) -> str:
     """
     Call Anthropic API. Requires ANTHROPIC_API_KEY.
@@ -229,9 +229,9 @@ def _call_anthropic(
 # Unified LLM interface
 # ---------------------------------------------------------------------------
 
-class PrepSenseLLM:
+class HavenLLM:
     """
-    Unified LLM interface for PrepSense RAG.
+    Unified LLM interface for HAVEN RAG.
 
     Backend selected via LLM_BACKEND env var:
         ollama     → local Mistral 7B (default, development)
@@ -239,8 +239,8 @@ class PrepSenseLLM:
         anthropic  → Claude Haiku (paid fallback)
 
     Usage:
-        llm = PrepSenseLLM()                    # reads LLM_BACKEND from env
-        llm = PrepSenseLLM(backend="groq")      # explicit override
+        llm = HavenLLM()                    # reads LLM_BACKEND from env
+        llm = HavenLLM(backend="groq")      # explicit override
         answer = llm.answer(
             question="Why do I need a battery-powered radio?",
             retrieved_chunks=chunks,
@@ -266,7 +266,7 @@ class PrepSenseLLM:
         self.ollama_model = ollama_model
         self.ollama_url   = ollama_url
         self.groq_model   = groq_model
-        print(f"PrepSenseLLM ready — backend: {self.backend}")
+        print(f"HavenLLM ready — backend: {self.backend}")
         if self.backend == "groq":
             print(f"  Groq model: {self.groq_model}")
             print(f"  Free quota: 14,400 req/day | Sign up: console.groq.com")
@@ -283,7 +283,7 @@ class PrepSenseLLM:
 
         Args:
             question:         Natural language question from the user.
-            retrieved_chunks: Top-k chunks from PrepSenseRetriever.
+            retrieved_chunks: Top-k chunks from HavenRetriever.
             gaps:             GapItem list from analyze_inventory().
             temperature:      LLM temperature (0.2 = focused, 0.7 = creative).
 

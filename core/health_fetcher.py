@@ -236,7 +236,7 @@ def _compute_health_score(threats: List[ThreatSignal]) -> int:
 # ---------------------------------------------------------------------------
 
 def fetch_latest_cdtr_summary(timeout: int = 15) -> dict:
-    headers = {"User-Agent": "PrepSense/1.0 (health risk monitor; non-commercial)"}
+    headers = {"User-Agent": "HAVEN/1.0 (health risk monitor; non-commercial)"}
 
     resp = requests.get(CDTR_LISTING_URL, headers=headers, timeout=timeout)
     resp.raise_for_status()

@@ -1,7 +1,7 @@
 """
 app_cloud.py
 -------------
-PrepSense — Streamlit Cloud deployment (Option A: direct imports, no FastAPI).
+HAVEN — Streamlit Cloud deployment (Option A: direct imports, no FastAPI).
 
 Differences from app.py (FastAPI version):
     - No HTTP calls — all modules imported directly
@@ -100,7 +100,7 @@ DEFAULT_KIT = [
     KitItem(name="Spare keys",            category="tools",   quantity=0.0,  eu_recommended=1.0,  unit="units",  expiry_date=None),
 ]
 
-DB_PATH = _secret("DB_PATH", "prepsense.db")
+DB_PATH = _secret("DB_PATH", "haven.db")
 
 
 # ---------------------------------------------------------------------------
@@ -319,17 +319,17 @@ def _load_agent():
     """Load retriever + LLM once per deployment instance."""
     from pathlib import Path
     try:
-        from rag.retriever import PrepSenseRetriever
-        from rag.llm import PrepSenseLLM
-        from agent.agent import PrepSenseAgent
+        from rag.retriever import HavenRetriever
+        from rag.llm import HavenLLM
+        from agent.agent import HavenAgent
 
         faiss_dir = Path("data/faiss")
-        retriever = PrepSenseRetriever.from_disk(
+        retriever = HavenRetriever.from_disk(
             index_path=str(faiss_dir / "index.bin"),
             meta_path= str(faiss_dir / "chunks.json"),
         )
         backend = _secret("LLM_BACKEND", "groq")
-        llm     = PrepSenseLLM(backend=backend)
+        llm     = HavenLLM(backend=backend)
         return retriever, llm
     except Exception as e:
         return None, None
@@ -382,7 +382,7 @@ def alert_card_html(alert: dict) -> str:
 # ---------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="PrepSense",
+    page_title="HAVEN",
     page_icon="🛡",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -419,8 +419,8 @@ weather_data  = _fetch_weather(lat, lon)
 regional_data = _fetch_regional(country)
 health_data   = _fetch_health()
 
-# Build PrepSenseSignals for the alert prioritizer
-from core.risk_engine import RiskResult, PrepSenseSignals
+# Build HavenSignals for the alert prioritizer
+from core.risk_engine import RiskResult, HavenSignals
 _risk_result = RiskResult(
     risk_score=       weather_data["score"],
     risk_level=       weather_data["level"],
@@ -429,7 +429,7 @@ _risk_result = RiskResult(
     wind_bonus=       weather_data["breakdown"]["wind_bonus"],
     rain_bonus=       weather_data["breakdown"]["rain_bonus"],
 )
-signals = PrepSenseSignals(
+signals = HavenSignals(
     weather=            _risk_result,
     geo_score=          regional_data["score"],
     geo_trend=          regional_data["trend"],
@@ -445,7 +445,7 @@ signals = PrepSenseSignals(
 
 col_title, col_meta, col_refresh = st.columns([3, 2, 1])
 with col_title:
-    st.markdown("# 🛡 PrepSense")
+    st.markdown("# 🛡 HAVEN")
     st.markdown("*AI-powered emergency preparedness copilot*")
 with col_meta:
     st.markdown("<br>", unsafe_allow_html=True)
@@ -495,7 +495,7 @@ with col_map:
                 "https://nominatim.openstreetmap.org/reverse",
                 params={"lat": clicked_lat, "lon": clicked_lon,
                         "format": "json", "zoom": 10},
-                headers={"User-Agent": "PrepSense/1.0", "Accept-Language": "en"},
+                headers={"User-Agent": "HAVEN/1.0", "Accept-Language": "en"},
                 timeout=5,
             ).json()
             geo_addr        = geo.get("address", {})
@@ -833,8 +833,8 @@ with col_chat:
                     sources = []
                     st.warning(answer)
                 else:
-                    from agent.agent import PrepSenseAgent
-                    agent = PrepSenseAgent(
+                    from agent.agent import HavenAgent
+                    agent = HavenAgent(
                         retriever=  retriever,
                         inv_report= inv_report,
                         signals=    signals,

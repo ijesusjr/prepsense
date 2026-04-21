@@ -1,12 +1,12 @@
 """
 agent/agent.py
 ---------------
-PrepSense agent — orchestrates tools, routing, and LLM answer composition.
+HAVEN agent — orchestrates tools, routing, and LLM answer composition.
 
 Architecture: structured router with closure-based node injection.
 
 Dependencies (retriever, inv_report, signals, llm) are stored on the
-PrepSenseAgent instance and injected into LangGraph nodes via closures.
+HavenAgent instance and injected into LangGraph nodes via closures.
 This avoids the TypedDict key-dropping issue that occurs when passing
 objects through LangGraph state.
 
@@ -50,7 +50,7 @@ class AgentState(TypedDict):
 # Prompt templates
 # ---------------------------------------------------------------------------
 
-COMPOSE_SYSTEM = """You are PrepSense, an AI emergency preparedness advisor.
+COMPOSE_SYSTEM = """You are HAVEN, an AI emergency preparedness advisor.
 Answer based ONLY on the provided tool results and guidelines.
 Always cite sources as [Source: document name, Page X].
 Be practical and specific. If addressing kit gaps, mention the user's actual numbers.
@@ -97,19 +97,19 @@ class AgentResponse:
 
 
 # ---------------------------------------------------------------------------
-# PrepSense Agent
+# HAVEN Agent
 # ---------------------------------------------------------------------------
 
-class PrepSenseAgent:
+class HavenAgent:
     """
-    PrepSense conversational agent.
+    HAVEN conversational agent.
 
     Uses closure-based node injection so object references (retriever,
     inv_report, signals, llm) never pass through LangGraph state —
     they live on self and are captured by each node method.
 
     Usage:
-        agent = PrepSenseAgent(retriever, inv_report, signals, llm)
+        agent = HavenAgent(retriever, inv_report, signals, llm)
         response = agent.ask("How long will my kit last in a power outage?")
         agent.print_response(response)
     """
@@ -301,11 +301,20 @@ class PrepSenseAgent:
     # ── Public interface ──────────────────────────────────────────────────────
 
     def ask(self, query: str, event_type: str = "general",
-            duration_hours: int = 72) -> AgentResponse:
-        """Ask the PrepSense agent a question."""
+            duration_hours: int = 72,
+            people: Optional[int] = None) -> AgentResponse:
+        """Ask the HAVEN agent a question.
+
+        Args:
+            query:          Natural language question from the user.
+            event_type:     Scenario type for run_scenario (power_outage, flood, etc.).
+            duration_hours: Scenario duration for run_scenario.
+            people:         Household size override. Defaults to the value set at
+                            construction time (self.people).
+        """
         initial: AgentState = {
             "query":          query,
-            "people":         self.people,
+            "people":         people if people is not None else self.people,
             "event_type":     event_type,
             "duration_hours": duration_hours,
             "routing":        None,

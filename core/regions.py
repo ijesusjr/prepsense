@@ -1,7 +1,7 @@
 """
 core/regions.py
 ----------------
-Country → regional neighbours mapping for PrepSense regional risk fetcher.
+Country → regional neighbours mapping for HAVEN regional risk fetcher.
 
 Used by:
     api/main.py   — to derive region_countries when location changes

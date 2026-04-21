@@ -1,13 +1,13 @@
 """
 rag/pipeline.py
 ----------------
-End-to-end PrepSense RAG pipeline.
+End-to-end HAVEN RAG pipeline.
 
 Wires retriever → LLM → cited answer.
 This is the single entry point for the Streamlit UI and FastAPI backend.
 
 Usage:
-    pipeline = PrepSensePipeline.from_disk(
+    pipeline = HavenPipeline.from_disk(
         index_path="data/faiss/index.bin",
         meta_path="data/faiss/chunks.json",
     )
@@ -25,8 +25,8 @@ import os
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from rag.retriever import PrepSenseRetriever, RetrievedChunk
-from rag.llm import PrepSenseLLM
+from rag.retriever import HavenRetriever, RetrievedChunk
+from rag.llm import HavenLLM
 
 
 # ---------------------------------------------------------------------------
@@ -46,9 +46,9 @@ class RAGResponse:
 # Pipeline
 # ---------------------------------------------------------------------------
 
-class PrepSensePipeline:
+class HavenPipeline:
     """
-    End-to-end PrepSense RAG pipeline.
+    End-to-end HAVEN RAG pipeline.
 
     Retrieves relevant chunks from the knowledge base,
     injects them + kit gaps into the LLM prompt,
@@ -57,8 +57,8 @@ class PrepSensePipeline:
 
     def __init__(
         self,
-        retriever:    PrepSenseRetriever,
-        llm:          PrepSenseLLM,
+        retriever:    HavenRetriever,
+        llm:          HavenLLM,
     ):
         self.retriever = retriever
         self.llm       = llm
@@ -70,7 +70,7 @@ class PrepSensePipeline:
         meta_path:    str = "data/faiss/chunks.json",
         backend:      Optional[str] = None,
         ollama_model: str = "mistral",
-    ) -> "PrepSensePipeline":
+    ) -> "HavenPipeline":
         """
         Load pipeline from persisted FAISS index.
 
@@ -80,8 +80,8 @@ class PrepSensePipeline:
             backend:      "ollama" or "anthropic" (defaults to LLM_BACKEND env var).
             ollama_model: Ollama model name (e.g. "mistral", "llama3.1").
         """
-        retriever = PrepSenseRetriever.from_disk(index_path, meta_path)
-        llm       = PrepSenseLLM(backend=backend, ollama_model=ollama_model)
+        retriever = HavenRetriever.from_disk(index_path, meta_path)
+        llm       = HavenLLM(backend=backend, ollama_model=ollama_model)
         return cls(retriever=retriever, llm=llm)
 
     def ask(
