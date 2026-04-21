@@ -2,3 +2,7 @@ raw_data/
 .env
 .envrc
 .streamlit/secrets.toml
+.devcontainer
+.pytest_cache
+.python-version
+emergency_kit_sources.txt

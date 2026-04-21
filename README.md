@@ -1,9 +1,20 @@
-# HAVEN — AI Emergency Preparedness Copilot
+# HAVEN — Hazard-Aware Vigilance and Emergency Navigator
 
-HAVEN is an end-to-end data science project that helps EU residents assess their
-personal emergency readiness. It monitors three independent risk signals in real time,
-analyses the user's emergency kit against official EU government recommendations, and
-uses a RAG-powered agent to answer preparedness questions with cited guidance.
+**HAVEN** is an end-to-end data science project that helps EU residents assess their personal emergency readiness. It monitors three independent risk signals in real-time, analyzes the user's emergency kit against EU government recommendations, and uses a RAG-powered agent to answer preparedness questions with cited guidance.
+
+<img src="haven_logo.png" width="40%" alt="HAVEN Logo">
+
+---
+
+## Overview
+
+In a world of increasing climate and regional volatility, HAVEN (Hazard-Aware Vigilance and Emergency Navigator) serves as a personalized safety bridge between government data and individual action. Unlike generic weather apps, HAVEN:
+
+- Contextualizes Risk: Cross-references live weather, disaster, and health data with your specific location.
+
+- Quantifies Readiness: Moves beyond "you should have water" to "your current water supply lasts 16 hours for your household of three."
+
+- Provides Verifiable Answers: Uses a Retrieval-Augmented Generation (RAG) pipeline to ensure all advice is backed by EU emergency documentation.
 
 ---
 
@@ -18,6 +29,32 @@ Given a location and a home emergency kit inventory, HAVEN:
 - Runs a **scenario simulator** — "if the power goes out for 72 hours, how long does my kit last?"
 - Answers natural language questions with **cited EU guidance** via a RAG pipeline
 - Surfaces a **ranked action list** that crosses all signals against kit state
+
+---
+
+## App Demo
+
+**https://haven-app.streamlit.app/**
+
+---
+
+## Dataset
+
+HAVEN utilizes a hybrid data strategy combining real-time API streams and a static knowledge base:
+
+1. Real-Time Risk Streams
+- Weather: OpenWeatherMap One Call 3.0 (National alerts from AEMET, SMHI, etc.).
+- Regional Disasters: GDACS (Global Disaster Alert and Coordination System) RSS feeds.
+- Humanitarian Crises: ReliefWeb (UN OCHA) API.
+- Public Health: ECDC (European Centre for Disease Prevention and Control) weekly Communicable Disease Threats Reports.
+
+2. RAG Knowledge Base (Vector Store)
+The system is grounded in 4  EU government emergency preparedness guides:
+- Belgium: Crisis Centre (crisiscenter.be)
+- Netherlands: Denk Vooruit (denkvooruit.nl)
+- Sweden: Krisinformation (krisinformation.se)
+- Czech Republic: 72h.cz
+
 
 ---
 
@@ -70,14 +107,13 @@ Given a location and a home emergency kit inventory, HAVEN:
 
 ### Key design decisions
 
-**Option C risk architecture** — three signals on different scales, never summed.
-A weather alert and an Ebola outbreak are not additive. Each signal has its own
+**Risk architecture** — three signals on different scales, never summed. Each signal has its own
 scale (100 / 30 / 50), update cadence, and geographic scope. The UI displays them
 as independent gauges.
 
-**Structured routing over ReAct** — the agent classifies intent with keywords
+**Structured routing** — the agent classifies intent with keywords
 (LLM fallback for ambiguous queries), then calls tools deterministically. This is
-more reliable for a safety-critical domain and easier to audit than a ReAct loop.
+more reliable for a safety-critical domain and easier to audit.
 
 **Local-first RAG** — `all-MiniLM-L6-v2` runs fully locally (no API calls,
 no rate limits). The FAISS index is 28 KB. LLM is the only cloud dependency, and
@@ -122,23 +158,6 @@ Full kit — same scenario:
 
 Supported events: `power_outage` · `flood` · `earthquake` · `heat_wave` · `general`
 
-### RAG knowledge base
-4 official EU government emergency preparedness guides:
-- Belgium (Crisis Centre, crisiscenter.be)
-- Netherlands (Denk Vooruit, denkvooruit.nl)
-- Sweden (Krisinformation, krisinformation.se)
-- Czech Republic (72h.cz)
-
-19 chunks · 384-dimensional embeddings · exact cosine search (FAISS IndexFlatIP)
-
-### Agent intents
-| Intent | Tools called |
-|--------|-------------|
-| `KIT_QUESTION` | guidelines · kit gaps |
-| `RISK_QUESTION` | risk score |
-| `SCENARIO` | kit gaps · scenario · guidelines |
-| `GENERAL_PREP` | guidelines |
-| `UNKNOWN` | fallback → official source links |
 
 ---
 
@@ -153,7 +172,7 @@ Supported events: `power_outage` · `flood` · `earthquake` · `heat_wave` · `g
 ### Install
 
 ```bash
-git clone https://github.com/<your-username>/haven.git
+git clone https://github.com/ijesusjr/haven.git
 cd haven
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -265,18 +284,6 @@ Switch with one env var — the prompt template is identical across all backends
 
 ---
 
-## Tests
-
-```bash
-pytest tests/ -v
-# 145 passed
-```
-
-Tests cover the risk engine, inventory analyser, alert prioritiser, health fetcher,
-and regional risk fetcher. No API calls are made — all live-data functions have
-`simulate_*` counterparts used in tests.
-
----
 
 ## Data sources
 
@@ -286,5 +293,9 @@ and regional risk fetcher. No API calls are made — all live-data functions hav
 | [GDACS](https://www.gdacs.org/rss.aspx) | Natural disaster alerts (RSS, no auth) | None |
 | [ReliefWeb](https://reliefweb.int/help/api) | Humanitarian crisis reports (REST API) | None (1,000 calls/day) |
 | [ECDC CDTR](https://www.ecdc.europa.eu/en/publications-and-data/communicable-disease-threats-report) | Weekly disease threats | None (public HTML) |
-| EU government guides | RAG knowledge base | Public PDFs |
+| [NL Guidelines](https://english.denkvooruit.nl/documents/2025/11/25/putting-together-an-emergency-kit) | RAG knowledge base | None (public HTML) |
+| [CZ Guidelines](https://www.72h.gov.cz/en/emergency-supplies) | RAG knowledge base | None (public HTML) |
+| [BE Guidelines](https://crisiscenter.be/en/what-can-you-do/build-emergency-kit/emergency-kit-home#:~:text=The%20European%20Union%20recommends%20having%20an%20emergency,or%20matches%20*%20Candles%20or%20tea%20lights) | RAG knowledge base | None (public HTML) |
+| [SE Guidelines](https://www.mcf.se/en/advice-for-individuals/home-preparedness--prepping-for-at-least-a-week/basics-of-home-emergency-preparedness/#:~:text=Radio%20powered%20by%20batteries%2C%20solar,%2C%20emergency%20services%2C%20energy%20provider.) | RAG knowledge base | None (public HTML) |
+
 
