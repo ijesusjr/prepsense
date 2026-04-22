@@ -309,14 +309,24 @@ def _fetch_regional(country: str) -> dict:
         from core.regional_risk_fetcher import get_regional_snapshot
         region = get_region(country)
         geo    = get_regional_snapshot(country=country, region_countries=region)
+        gdacs_alerts = [
+            {"title": e.title, "alert_level": e.alert_level, "event_type": e.event_type, "country": e.country}
+            for e in geo.disaster_events
+        ]
+        crisis_themes = list(dict.fromkeys(
+            r.theme for r in geo.crisis_reports if r.theme
+        ))
         return {
-            "score":   geo.regional_score,
-            "level":   _geo_level(geo.regional_score),
-            "trend":   "STABLE",
-            "country": geo.country,
+            "score":         geo.regional_score,
+            "level":         _geo_level(geo.regional_score),
+            "trend":         "STABLE",
+            "country":       geo.country,
+            "gdacs_alerts":  gdacs_alerts,
+            "crisis_themes": crisis_themes,
         }
     except Exception:
-        return {"score": 0, "level": "MINIMAL", "trend": "STABLE", "country": country}
+        return {"score": 0, "level": "MINIMAL", "trend": "STABLE", "country": country,
+                "gdacs_alerts": [], "crisis_themes": []}
 
 
 @st.cache_data(ttl=604800, show_spinner=False)
@@ -654,6 +664,21 @@ Measures active national weather alerts and current conditions
 
     score_gauge("⚔ Regional Risk", r["score"], 30, r["level"])
     st.caption(f"Trend: {r['trend']} · {r['country']}")
+
+    _GDACS_COLORS = {"Red": "🔴", "Orange": "🟠", "Green": "🟢"}
+    gdacs_alerts  = r.get("gdacs_alerts", [])
+    crisis_themes = r.get("crisis_themes", [])
+
+    if gdacs_alerts:
+        for ev in gdacs_alerts[:3]:
+            dot = _GDACS_COLORS.get(ev["alert_level"], "⚪")
+            st.caption(f"{dot} GDACS {ev['alert_level']} · {ev['event_type']} · {ev['country']}")
+    else:
+        st.caption("GDACS: no active alerts in the region")
+
+    if crisis_themes:
+        st.caption("ReliefWeb themes: " + " · ".join(crisis_themes[:4]))
+
     with st.expander("ℹ About this risk", expanded=False):
         st.markdown("""<div style="font-size:0.8em">
 

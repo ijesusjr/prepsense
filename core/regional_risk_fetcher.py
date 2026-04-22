@@ -195,8 +195,8 @@ def compute_disaster_score(events: List[DisasterEvent]) -> int:
 
 _THEME_SCORES = {
     "Conflict and Violence":                         8,
-    "Refugees and Internally Displaced Persons":     8,
-    "Disaster Management":                           6,
+    "Refugees and Internally Displaced Persons":     6,
+    "Disaster Management":                           8,
     "Food and Nutrition":                            4,
     "Agriculture":                                   2,
     "Protection and Human Rights":                   4,
