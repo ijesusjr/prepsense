@@ -306,7 +306,7 @@ def _clean_event(event: str) -> str:
 def _fetch_regional(country: str) -> dict:
     """Fetch regional risk — cached 7 days."""
     try:
-        from core.regional_risk_fetcher import get_regional_snapshot
+        from core.regional_risk_fetcher import get_regional_snapshot, _THEME_SCORES
         region = get_region(country)
         geo    = get_regional_snapshot(country=country, region_countries=region)
         gdacs_alerts = [
@@ -314,7 +314,7 @@ def _fetch_regional(country: str) -> dict:
             for e in geo.disaster_events
         ]
         crisis_themes = list(dict.fromkeys(
-            r.theme for r in geo.crisis_reports if r.theme
+            r.theme for r in geo.crisis_reports if r.theme in _THEME_SCORES
         ))
         return {
             "score":         geo.regional_score,
