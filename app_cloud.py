@@ -453,7 +453,7 @@ with col_refresh:
         st.toast("Cache cleared — signals refreshing...", icon="🔄")
         time.sleep(1)
         st.rerun()
-    st.markdown('<p style="font-size:0.85rem;color:#888;margin-top:4px;">🕐 Weather: 60 min cache · Regional/Health: 7 day cache</p>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size:0.65rem;color:#888;margin-top:4px;text-align:center;">🕐 Weather: 60 min cache · Regional/Health: 7 day cache</p>', unsafe_allow_html=True)
 
 st.divider()
 
