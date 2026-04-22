@@ -445,7 +445,7 @@ signals = HavenSignals(
 
 col_title, col_meta, col_refresh = st.columns([3, 2, 1])
 with col_title:
-    st.image("haven_logo_horizontal.png", width=280)
+    st.image("haven_logo_horizontal.png", width=600)
 with col_meta:
     st.markdown("<br>", unsafe_allow_html=True)
     st.caption("🕐 Weather: 60 min cache · Regional/Health: 7 day cache")
