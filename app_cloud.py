@@ -390,7 +390,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-  .block-container { padding-top: 1rem; }
+  .block-container { padding-top: 2.5rem; }
   .alert-scroll { max-height: 420px; overflow-y: auto; padding-right: 4px; }
 </style>
 """, unsafe_allow_html=True)
@@ -453,7 +453,7 @@ with col_refresh:
         st.toast("Cache cleared — signals refreshing...", icon="🔄")
         time.sleep(1)
         st.rerun()
-    st.caption("🕐 Weather: 60 min cache · Regional/Health: 7 day cache")
+    st.markdown('<p style="font-size:0.65rem;color:#888;margin-top:4px;">🕐 Weather: 60 min cache · Regional/Health: 7 day cache</p>', unsafe_allow_html=True)
 
 st.divider()
 
