@@ -195,11 +195,11 @@ def compute_disaster_score(events: List[DisasterEvent]) -> int:
 
 _THEME_SCORES = {
     "Conflict and Violence":                         8,
-    "Refugees and Internally Displaced Persons":     6,
+    "Refugees and Internally Displaced Persons":     4,
     "Disaster Management":                           8,
     "Food and Nutrition":                            4,
     "Agriculture":                                   2,
-    "Protection and Human Rights":                   4,
+    "Protection and Human Rights":                   2,
     "Humanitarian Financing":                        2,
 }
 
@@ -264,7 +264,7 @@ def fetch_reliefweb_reports(
         if any(kw in title.lower() for kw in _SKIP_TITLE_KEYWORDS):
             continue
 
-        score = _THEME_SCORES.get(theme_str, 3)
+        score = _THEME_SCORES.get(theme_str, 1)
         reports.append(CrisisReport(
             title=   title,
             country= country,
