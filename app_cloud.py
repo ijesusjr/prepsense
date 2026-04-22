@@ -443,12 +443,9 @@ signals = HavenSignals(
 # ── HEADER ──────────────────────────────────────────────────────────────────
 # ---------------------------------------------------------------------------
 
-col_title, col_meta, col_refresh = st.columns([3, 2, 1])
+col_title, col_refresh = st.columns([5, 1])
 with col_title:
-    st.image("haven_logo_horizontal.png", width=600)
-with col_meta:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.caption("🕐 Weather: 60 min cache · Regional/Health: 7 day cache")
+    st.image("haven_logo_horizontal.png")
 with col_refresh:
     st.markdown("<br><br>", unsafe_allow_html=True)
     if st.button("🔄 Refresh", use_container_width=True):
@@ -456,6 +453,7 @@ with col_refresh:
         st.toast("Cache cleared — signals refreshing...", icon="🔄")
         time.sleep(1)
         st.rerun()
+    st.caption("🕐 Weather: 60 min cache · Regional/Health: 7 day cache")
 
 st.divider()
 
